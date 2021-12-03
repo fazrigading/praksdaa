@@ -1,6 +1,7 @@
 #include <iostream>
 #include <conio.h>
 #include <bits/stdc++.h>
+#include <fstream>
 #include <sstream>
 #include <string>
 using namespace std;
@@ -13,12 +14,17 @@ struct DaftarMenu{
 
 struct Pemesanan{
     string namamenu;
-    int banyak;
-    int totalharga;
+    int banyak, totalharga;
 };
 
 struct Akun{
     string username, password, nama, no_hp, alamat;
+};
+
+struct Node{
+    struct DaftarMenu menu;
+    struct Node *next;
+    struct Node *prev;
 };
 
 struct NodeOrderan{
@@ -31,12 +37,6 @@ struct NodeOrderan{
 struct NodeAkun{
     struct Akun account;
     struct NodeAkun *next;
-};
-
-struct Node{
-    struct DaftarMenu menu;
-    struct Node *next;
-    struct Node *prev;
 };
 
 struct DaftarMenu arr[50], temp;
@@ -58,20 +58,18 @@ void lihatMenu(Node *head, int role){
     if (role == 1){
         cout << "[No] [Stok] [Harga]\t[Menu]" << endl;
         while (head != NULL){
-            if (i < 9) cout << "[0"<<i+1<<"] " << head->menu.stok 
-            << "     Rp" << head->menu.harga 
-            << "\t" << head->menu.nama << endl;
-            else cout << "["<<i+1<<"] " << head->menu.stok 
-            << "     Rp" << head->menu.harga 
-            << "\t" << head->menu.nama << endl;
+            if (i < 9) cout << "[0" << i+1 << "] ";
+            else cout << "[" << i+1 << "] ";
+            cout << head->menu.stok << "     Rp" << head->menu.harga << "\t" << head->menu.nama << endl;
             i++; lastNodeIndex++;
             head = head->next;
         }
     } else if (role == 2){
         cout << "[No] [Harga]\t[Menu]" << endl;
         while (head != NULL){
-            if (i < 9) cout << "[0"<<i+1<<"] Rp"<<head->menu.harga<<"\t"<<head->menu.nama<<endl;
-            else cout << "["<<i+1<<"] Rp"<<head->menu.harga<<"\t"<<head->menu.nama<<endl;
+            if (i < 9) cout << "[0" << i+1 << "] Rp";
+            else cout << "["<<i+1<<"] Rp";
+            cout << head->menu.harga << "\t" << head->menu.nama << endl;
             i++; lastNodeIndex++;
             head = head->next;
         }
@@ -91,8 +89,8 @@ void editMenu(Node *node){
         system("pause");
         return;
     }
-    for (int i = 1; i < nomor; i++) node = node->next; // agar sampai ke data yang diinginkan
-    if (node == NULL) { // jika node kosong
+    for (int i = 1; i < nomor; i++) node = node->next;
+    if (node == NULL) { 
         cout << "Data tidak ditemukan." << endl;
         system("pause");
         return;
@@ -833,8 +831,11 @@ void customer(){
             NodeKeArrayOrder(&ord[0], headord);
             ArraykeCSV(&arr[0], &acc[0], &ord[0], 3);
             break;
-        } else {
+        } else if (selectBuy > 0){
             pesanMenu(head, &psn[0], selectBuy);
+        } else {
+            cout << "Error: Menu tidak tersedia." << endl;
+            system("pause");
         }
     }
 }
@@ -904,24 +905,25 @@ void login(Akun *acc){
                 cout << "===========================================" << endl;
                 system("pause");
             }
-        } 
-        for (int i = 0; i < countArrayAccount; i++){
-            if (user == acc[i].username){
-                userCocok = true;
-                if (pass == acc[i].password){
-                    passCocok = true;
-                    indexAkun = i;
-                    break;
+        } else {
+            for (int i = 0; i < countArrayAccount; i++) {
+                if (user == acc[i].username){
+                    userCocok = true;
+                    if (pass == acc[i].password){
+                        passCocok = true;
+                        indexAkun = i;
+                        break;
+                    }
                 }
             }
-        }
-        if (userCocok == true && passCocok == true){
-            break;
-        } else {
-            cout << "===========================================" << endl;
-            cout << "Error: Username atau password Anda salah."   << endl;
-            cout << "===========================================" << endl;
-            system("pause");
+            if (userCocok == true && passCocok == true){
+                break;
+            } else {
+                cout << "===========================================" << endl;
+                cout << "Error: Username atau password Anda salah."   << endl;
+                cout << "===========================================" << endl;
+                system("pause");
+            }
         }
     }
     return customer();
