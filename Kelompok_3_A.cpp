@@ -589,6 +589,8 @@ void strukBelanja(Pemesanan *psn, Akun *acc){
         << "[>] "; cin >> confirm;
         if (confirm == 1){
             orderanMasuk(&headord, &psn[0], &acc[0], totalhargapesanan);
+            NodeKeArrayOrder(&ord[0], headord);
+	    ArraykeCSV(&arr[0], &acc[0], &ord[0], 3);
             cout<< "=========================" << endl
                 << "GOPAY, OVO, DANA:" << endl
                 << "081250342450" << endl
@@ -732,8 +734,6 @@ void admin(){
                 cout << "[>] "; cin >> selectAdmin1;
                 if (selectAdmin1 == 1 || selectAdmin1 == 2){
                     orderanSelesai(&headord);
-                    NodeKeArrayOrder(&ord[0], headord);
-                    ArraykeCSV(&arr[0], &acc[0], &ord[0], 3);
                 } else if (selectAdmin1 == 0) {
                     break;
                 } else {
