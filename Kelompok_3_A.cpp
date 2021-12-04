@@ -247,7 +247,7 @@ void tambahAkun(NodeAkun **headacc){
     cout << "                TAMBAH AKUN                " << endl;
     cout << "===========================================" << endl;
     NodeAkun *newNode = new NodeAkun();
-    cout << "\nAkun ke-" << lastNodeAccount+1 << ":" << endl;
+    cout << "Akun ke-" << lastNodeAccount+1 << ":" << endl;
     cout << "Username: "; cin >> newNode->account.username;
     cout << "Password: "; cin >> newNode->account.password;
     cout << "Nama    : "; cin.ignore(); getline(cin, newNode->account.nama);
@@ -262,6 +262,7 @@ void tambahAkun(NodeAkun **headacc){
         current->next = newNode;
     }
     akunChanged = 1; 
+    lastNodeAccount++;
 }
 
 void editAkun(NodeAkun *nodeacc){
@@ -290,37 +291,6 @@ void editAkun(NodeAkun *nodeacc){
     cout << "Data telah diupdate." << endl;
     akunChanged = 1;
     system("pause");
-}
-
-void hapusAkun(NodeAkun **headacc){
-    cout << "===========================================" << endl;
-    cout << "                 HAPUS AKUN                " << endl;
-    cout << "===========================================" << endl;
-    if (*headacc == NULL){
-        cout << "Menu Kosong" << endl;
-        system("pause");
-        lastNodeAccount = 0;
-        return;
-    }
-    int nomor;
-    cout << "Hapus Akun No: "; cin >> nomor;
-    if (nomor == 0) return;
-    if (nomor < 1 || nomor > lastNodeAccount){
-        cout << "Data tidak ditemukan." << endl;
-        system("pause");
-        return;
-    }
-    if((*headacc)->next == NULL){
-        *headacc = NULL;
-        akunChanged = 1; 
-        return;
-    }
-    NodeAkun *current = *headacc;
-    while(current->next->next != NULL) current = current->next;
-    current->next = NULL;
-    free(current);
-    lastNodeAccount--;
-    akunChanged = 1; 
 }
 
 void NodeKeArrayOrder(NodeOrderan *ord, NodeOrderan *nodeord){
@@ -369,16 +339,23 @@ void ArrayKeNodeOrder(NodeOrderan *ord, NodeOrderan **headord){
     }
 }
 
-void urutMenu(DaftarMenu *arr, int size){
+void urutMenu(DaftarMenu *arr, int size, int type){
     for (int gap = size/2; gap > 0; gap /= 2) {
         for (int i = 0; i < size; i += 1){
             temp = arr[i];
             int j;
-            for (j = i; j >= gap && arr[j-gap].nama > temp.nama; j -= gap) arr[j] = arr[j-gap];
+            if (type == 1) {
+                for (j = i; j >= gap && arr[j-gap].harga > temp.harga; j -= gap) 
+                arr[j] = arr[j-gap];
+            }
+            else if (type == 2){
+                for (j = i; j >= gap && arr[j-gap].nama > temp.nama; j -= gap) 
+                arr[j] = arr[j-gap];
+            }
             arr[j] = temp;
         }
     }
-    sorted = 1;
+    sorted = 2;
     SortedArrayKeNodeMenu(head);
     menuChanged = 1;
 }
@@ -400,7 +377,7 @@ int searchMenu(DaftarMenu *arr, string x, int n){
 
 void cariMenu(){
     string findText;
-    if (sorted != 1) urutMenu(&arr[0], lastNodeIndex);
+    if (sorted != 1) urutMenu(&arr[0], lastNodeIndex, 2);
     cout << "Cari Menu > "; cin.ignore(); getline(cin, findText);
     int i = searchMenu(&arr[0], findText, lastNodeIndex);
     if (i != -1){
@@ -590,7 +567,7 @@ void strukBelanja(Pemesanan *psn, Akun *acc){
         if (confirm == 1){
             orderanMasuk(&headord, &psn[0], &acc[0], totalhargapesanan);
             NodeKeArrayOrder(&ord[0], headord);
-	    ArraykeCSV(&arr[0], &acc[0], &ord[0], 3);
+            ArraykeCSV(&arr[0], &acc[0], &ord[0], 3);
             cout<< "=========================" << endl
                 << "GOPAY, OVO, DANA:" << endl
                 << "081250342450" << endl
@@ -663,7 +640,6 @@ void lihatUser(NodeAkun *headacc){
         return;
     }
     int i = 0; lastNodeAccount = 0;
-    system("cls");
     while (headacc != NULL){
         if (i < 9) 
         cout << "[0" << i+1 << "]" << endl <<
@@ -679,7 +655,6 @@ void lihatUser(NodeAkun *headacc){
         i++; lastNodeAccount++;
         headacc = headacc->next;
     }
-    system("pause");
 }
 
 void lihatOrderan(NodeOrderan *headord){
@@ -734,6 +709,8 @@ void admin(){
                 cout << "[>] "; cin >> selectAdmin1;
                 if (selectAdmin1 == 1 || selectAdmin1 == 2){
                     orderanSelesai(&headord);
+                    NodeKeArrayOrder(&ord[0], headord);
+                    ArraykeCSV(&arr[0], &acc[0], &ord[0], 3);
                 } else if (selectAdmin1 == 0) {
                     break;
                 } else {
@@ -762,7 +739,7 @@ void admin(){
                     case 1: tambahMenu(&head, &tail); break;
                     case 2: editMenu(head); break;
                     case 3: hapusMenu(&head, &tail); break;
-                    case 4: urutMenu(&arr[0], lastNodeIndex); break;
+                    case 4: urutMenu(&arr[0], lastNodeIndex, 1); break;
                     case 5: cariMenu(); break;
                     case 0: break;
                     default: 
@@ -775,6 +752,7 @@ void admin(){
                     ArraykeCSV(&arr[0], &acc[0], &ord[0], 1);
                     menuChanged = 0; 
                 }
+                if (selectAdmin2 == 0) break;
             }
         } else if (selectUtama == 3) {
             while (true){
@@ -788,13 +766,11 @@ void admin(){
                 cout << "===========================================" << endl;
                 cout << "[1] Tambah User" << endl;
                 cout << "[2] Edit User" << endl;
-                cout << "[3] Hapus User" << endl;
                 cout << "[0] Kembali" << endl;
                 cout << "[>] "; cin >> selectAdmin3;
                 switch(selectAdmin3){
                     case 1: tambahAkun(&headacc); break;
                     case 2: editAkun(headacc); break;
-                    case 3: hapusAkun(&headacc); break;
                     case 0: break;
                     default: 
                         cout << "ERROR: Pilihan tidak tersedia." << endl; 
@@ -806,6 +782,7 @@ void admin(){
                     ArraykeCSV(&arr[0], &acc[0], &ord[0], 2);
                     akunChanged = 0; 
                 }
+                if (selectAdmin3 == 0) break;
             }
         } else if (selectUtama == 0) {
             break;
@@ -828,8 +805,6 @@ void customer(){
         cout << "===========================================" << endl;
         cout << "Pesan [No] > "; cin >> selectBuy;
         if (selectBuy == 0){
-            NodeKeArrayOrder(&ord[0], headord);
-            ArraykeCSV(&arr[0], &acc[0], &ord[0], 3);
             break;
         } else if (selectBuy > 0){
             pesanMenu(head, &psn[0], selectBuy);
@@ -873,7 +848,7 @@ void regist(NodeAkun **headacc){
     lastNodeAccount++;
     NodeKeArrayAkun(&acc[0], *headacc);
     ArraykeCSV(&arr[0], &acc[0], &ord[0], 2);
-    cout << "===========================================" << endl;
+    cout << "\n===========================================" << endl;
     cout << "          Berhasil Registrasi Akun         "   << endl;
     cout << "===========================================" << endl;
     system("pause");
